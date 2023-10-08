@@ -1,7 +1,10 @@
 MLOps Project 
 ==============================
 
-This project aims to build a ML model to predict whether a collision from the test dataset generates bijets, trijets or tetrajets. It also includes fairness and interpretability analysis along with MLOps best practices.
+This project aims to build a ML model to predict whether a collision from the test dataset generates bijets, trijets or tetrajets. It also includes fairness and interpretability analysis along with MLOps best practices.  
+
+
+Dataset Source: https://www.kaggle.com/competitions/cern-cms-collisions-jets/overview 
 
 Project Organization
 ------------
