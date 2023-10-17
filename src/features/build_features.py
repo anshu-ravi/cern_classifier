@@ -1,15 +1,30 @@
 import logging
 from typing import Union, List
 from pickle import dump, load
+import json
 from sklearn.preprocessing import OneHotEncoder
 import pandas as pd
+import yaml
 
 
-# Initialize logging
-logging.basicConfig(level=logging.INFO)
+try:
+    with open("config.yaml", "r", encoding="utf-8") as config_file:
+        config_data = yaml.load(config_file, Loader=yaml.FullLoader)
+        logging_rules = config_data.get("logging", {})
+        logging.basicConfig(
+            level=logging.getLevelName(config_data["logging"]["level"]),
+            format=config_data["logging"]["format"],
+        )
+
+except FileNotFoundError:
+    print(f"Error: File path not found.")
+except yaml.YAMLError as e:
+    print(f"Error parsing YAML: {e}")
 
 
-def create_buckets(data: pd.DataFrame, cols: List[str], buckets: Union[None, List[float]] = None):
+def create_buckets(
+    data: pd.DataFrame, cols: List[str], buckets: Union[None, List[float]] = None
+):
     """
     Discretizes the values in the specified columns of the input DataFrame into
     four equal-frequency buckets (quartiles) using pandas.qcut, or into the
@@ -92,3 +107,37 @@ def convert_to_categorical(data: pd.DataFrame, cols: List[str], train: bool = Tr
         raise
 
 
+def factorize(df: pd.DataFrame, test: bool = False) -> pd.DataFrame:
+    """
+    Factorizes the 'jets' column of the input DataFrame and saves the definitions
+    to a JSON file if test is False. If test is True, the definitions are loaded
+    from the JSON file and used to factorize the 'jets' column.
+
+    Args:
+        df (pandas.DataFrame): The input DataFrame.
+        test (bool, optional): Whether the function is being called on train
+            data or test data. Defaults to False.
+
+    Returns:
+        pandas.DataFrame: The input DataFrame with the 'jets' column factorized.
+    """
+    try:
+        if not test:
+            factor = pd.factorize(df["jets"])
+            df["jets"] = factor[0]
+            logging.info('Successfully factorized "jets" column.')
+            defs = factor[1]
+            with open("./defs.json", "w", encoding="utf-8") as json_file:
+                json.dump(defs.tolist(), json_file)
+            return df
+        else:
+            with open("./defs.json", encoding="utf-8") as json_file:
+                defs = json.load(json_file)
+            df["jets"] = pd.Categorical(df["jets"], categories=defs)
+            df["jets"] = df["jets"].cat.codes
+            logging.info('Successfully factorized "jets" column.')
+            return df
+
+    except Exception as e:
+        logging.error(f"Error occurred while factorizing 'jets' column: {e}")
+        raise
