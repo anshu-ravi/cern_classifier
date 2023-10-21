@@ -1,4 +1,6 @@
 import json
+import sys 
+from pathlib import Path
 import logging
 import pickle
 import pandas as pd
@@ -8,7 +10,15 @@ from sklearn.metrics import (classification_report, f1_score, precision_score,
                              recall_score)
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV
 
+sys.path.append(
+    str(
+        Path(
+            "/mnt/c/Users/ransh/Documents/IE University/Year 5/Sem1/MLOps/cern_classifer/"
+        ).resolve()
+    )
+)
 
 try:
     with open("config.yaml", "r", encoding="utf-8") as config_file:
@@ -208,7 +218,54 @@ def evaluate_model(clf, X_valid, y_valid):
         raise
 
 
-def build_model(df: pd.DataFrame, y_col: str, test_size: float = 0.2) -> None:
+def improve_model(clf, X_train, y_train, param_grid, cv) -> GridSearchCV:
+    """
+    Use GridSearchCV to find the best hyperparameters for the model.
+
+    Args:
+        clf (sklearn.ensemble.RandomForestClassifier): The trained random forest classifier.
+        X_train (pandas.DataFrame): The training data.
+        y_train (pandas.Series): The training labels.
+        param_grid (dict): The parameter grid to be used for GridSearchCV.
+        cv (int): The number of cross-validation folds.
+
+    Returns:
+        None
+
+    Raises:
+        TypeError: If the input data is not a pandas dataframe or series.
+
+    """
+    try:
+        if not isinstance(X_train, pd.DataFrame):
+            raise TypeError("Input data must be a pandas dataframe.")
+        if not isinstance(y_train, pd.Series):
+            raise TypeError("Input labels must be a pandas series.")
+
+        if not param_grid:
+            param_grid = {
+                'n_estimators': [250, 500, 750, 1000],  # Number of trees in the forest
+                'max_depth': [None, 10, 20, 30],  # Maximum depth of each tree
+                'min_samples_split': [2, 5, 10],  # Minimum number of samples required to split a node
+                'min_samples_leaf': [1, 2, 4],  # Minimum number of samples required at each leaf node
+            }
+
+        logging.info("Starting model improvement process...")
+        clf = GridSearchCV(clf, param_grid, cv=cv, verbose=1, n_jobs=-1)
+        clf.fit(X_train, y_train)
+
+        logging.info(
+            f"Best parameters found: {clf.best_params_} with accuracy: {clf.best_score_}"
+        )
+        logging.info("Model improvement process completed successfully. Storing model...")
+        pickle.dump(clf, open("models/model_after_hp.pkl", "wb"))
+        return clf
+
+    except Exception as e:
+        logging.error(f"Error improving model: {e}")
+        raise
+
+def build_model(df: pd.DataFrame, y_col: str, test_size: float = 0.2, param_grid: dict = None, cv:int = 5):
     """
     Perform all model building steps and save the evaluation metrics in the reports folder
 
@@ -216,6 +273,11 @@ def build_model(df: pd.DataFrame, y_col: str, test_size: float = 0.2) -> None:
     df (pd.DataFrame): The dataframe containing the data.
     y_col (str): The name of the target column.
     test_size (float): The proportion of the data to be used for validation.
+    param_grid (dict): The hyperparameter grid to search over.
+    cv (int): The number of cross-validation folds to use.
+
+    Returns:
+    clf: The trained classifier.
     """
     try:
         logging.info("Starting model building process...")
@@ -225,5 +287,7 @@ def build_model(df: pd.DataFrame, y_col: str, test_size: float = 0.2) -> None:
         clf = train_random_forest_model(X_train, y_train)
         evaluate_model(clf, X_valid, y_valid)
         logging.info("Model building process completed successfully.")
+        clf = improve_model(clf, X_train, y_train, param_grid = param_grid, cv = cv)
+        return clf
     except Exception as e:
         logging.error(f"Error: {e}")
