@@ -1,25 +1,14 @@
 import logging
 import os
-from typing import Union
+from typing import Optional
 import yaml
 import pandas as pd
+from loggers.log_factory import setup_logging
 
-try:
-    with open("config.yaml", "r", encoding="utf-8") as config_file:
-        config_data = yaml.load(config_file, Loader=yaml.FullLoader)
-        logging_rules = config_data.get("logging", {})
-        logging.basicConfig(
-            level=logging.getLevelName(config_data["logging"]["level"]),
-            format=config_data["logging"]["format"],
-        )
-
-except FileNotFoundError:
-    print(f"Error: File path not found.")
-except yaml.YAMLError as e:
-    print(f"Error parsing YAML: {e}")
+logging = setup_logging(__name__)
 
 
-def data_loader(file_path: str) -> Union[pd.DataFrame, None]:
+def data_loader(file_path: str) -> Optional[pd.DataFrame]:
     """
     Loads data from a file located at the given file path. Supports CSV, XLSX, JSON, and TSV file formats.
 
