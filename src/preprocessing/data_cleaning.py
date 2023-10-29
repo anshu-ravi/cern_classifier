@@ -1,25 +1,10 @@
-import logging
 import pickle
-import yaml
 import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
+from loggers.log_factory import setup_logging
 
-
-# Load config file
-try:
-    with open("config.yaml", "r", encoding="utf-8") as config_file:
-        config_data = yaml.load(config_file, Loader=yaml.FullLoader)
-        logging_rules = config_data.get("logging", {})
-        logging.basicConfig(
-            level=logging.getLevelName(config_data["logging"]["level"]),
-            format=config_data["logging"]["format"],
-        )
-
-except FileNotFoundError:
-    print(f"Error: File path not found.")
-except yaml.YAMLError as e:
-    print(f"Error parsing YAML: {e}")
+logging = setup_logging(__name__)
 
 
 def fill_missing_values(df, test=False):
@@ -43,12 +28,12 @@ def fill_missing_values(df, test=False):
             logging.info("Fitting SimpleImputer to data...")
             imp_median = SimpleImputer(missing_values=np.nan, strategy="mean")
             df[["E1", "MR"]] = imp_median.fit_transform(df[["E1", "MR"]])
-            pickle.dump(imp_median, open("./median_imputer.pkl", "wb"))
+            pickle.dump(imp_median, open("./preprocessing/median_imputer.pkl", "wb"))
             return df
 
         else:
             logging.info("Loading SimpleImputer from pickle file...")
-            imp_median = pickle.load(open("./median_imputer.pkl", "rb"))
+            imp_median = pickle.load(open("./preprocessing/median_imputer.pkl", "rb"))
             logging.info("Transforming test data...")
             df[["E1", "MR"]] = imp_median.transform(df[["E1", "MR"]])
             return df
