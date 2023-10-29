@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-import logging
-import sys
 from pathlib import Path
 from typing import List
 import pandas as pd
-import click
 from dotenv import find_dotenv, load_dotenv
 from loader.data_loader import data_loader
 from loggers.log_factory import setup_logging
@@ -34,10 +31,7 @@ def merge_data(df1: pd.DataFrame, df2: pd.DataFrame, column_name: str) -> pd.Dat
         raise
 
 
-@click.command()
-@click.argument("input_filepath", type=click.Path(exists=True), nargs=2)
-@click.argument("output_filepath", type=click.Path())
-def load_data(input_filepath: List[str], output_filepath: str) -> None:
+def load_data(input_filepath: List[str], output_filepath: str) -> pd.DataFrame:
     """
     Loads two dataframes from input filepaths, merges them on 'id' column and saves the merged dataframe to output filepath.
 
@@ -56,6 +50,7 @@ def load_data(input_filepath: List[str], output_filepath: str) -> None:
         data = merge_data(df1, df2, "id")
         data.to_csv(output_filepath, index=False)
         logger.info(f"Successfully saved merged data to {output_filepath}")
+        return data
 
     except Exception as e:
         logger.error(f"Error loading or merging data: {e}")
