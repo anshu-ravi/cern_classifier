@@ -1,39 +1,15 @@
 import json
-import sys 
-from pathlib import Path
-import logging
 import pickle
 import pandas as pd
-import yaml
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (classification_report, f1_score, precision_score,
                              recall_score)
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
+from loggers.log_factory import setup_logging   
 
-sys.path.append(
-    str(
-        Path(
-            "/mnt/c/Users/ransh/Documents/IE University/Year 5/Sem1/MLOps/cern_classifer/"
-        ).resolve()
-    )
-)
-
-try:
-    with open("config.yaml", "r", encoding="utf-8") as config_file:
-        config_data = yaml.load(config_file, Loader=yaml.FullLoader)
-        logging_rules = config_data.get("logging", {})
-        logging.basicConfig(
-            level=logging.getLevelName(config_data["logging"]["level"]),
-            format=config_data["logging"]["format"],
-        )
-
-except FileNotFoundError:
-    print(f"Error: File path not found.")
-except yaml.YAMLError as e:
-    print(f"Error parsing YAML: {e}")
-
+logging = setup_logging(__name__)
 
 def data_split(df: pd.DataFrame, y_col: str, test_size: float) -> tuple:
     """
@@ -96,17 +72,14 @@ def scale_data(df: pd.DataFrame, test: bool = False) -> pd.DataFrame:
 
     """
     try:
-        if not isinstance(df, pd.DataFrame):
-            raise TypeError("Input data must be a pandas dataframe.")
-
         if not test:
             scaler = StandardScaler()
             df = scaler.fit_transform(df)
-            pickle.dump(scaler, open("./scaler.pkl", "wb"))
+            pickle.dump(scaler, open("./models/scaler.pkl", "wb"))
             logging.info("Training data scaled successfully.")
         else:
             try:
-                scaler = pickle.load(open("./scaler.pkl", "rb"))
+                scaler = pickle.load(open("./models/scaler.pkl", "rb"))
             except FileNotFoundError:
                 logging.error("Scaler file not found.")
                 raise
@@ -140,11 +113,6 @@ def train_random_forest_model(
 
     """
     try:
-        if not isinstance(X_train, pd.DataFrame):
-            raise TypeError("Input data must be a pandas dataframe.")
-        if not isinstance(y_train, pd.Series):
-            raise TypeError("Input labels must be a pandas series.")
-
         clf = RandomForestClassifier(
             n_estimators=500, criterion="entropy", random_state=random_state
         )
@@ -175,11 +143,6 @@ def evaluate_model(clf, X_valid, y_valid):
 
     """
     try:
-        if not isinstance(X_valid, pd.DataFrame):
-            raise TypeError("Input data must be a pandas dataframe.")
-        if not isinstance(y_valid, pd.Series):
-            raise TypeError("Input labels must be a pandas series.")
-
         preds = clf.predict(X_valid)
         clf_report = classification_report(y_valid, preds)
         logging.info(f"Classification report:\n{clf_report}")
@@ -202,11 +165,11 @@ def evaluate_model(clf, X_valid, y_valid):
         }
 
         # Dump classification report to json file
-        with open("reports/classification_report.json", "w") as f:
+        with open("../reports/classification_report.json", "w") as f:
             json.dump(clf_report, f)
 
         # Dump metrics to json file
-        with open("reports/metrics.json", "w") as f:
+        with open("../reports/metrics.json", "w") as f:
             json.dump(metrics, f)
 
         logging.info(
@@ -237,14 +200,9 @@ def improve_model(clf, X_train, y_train, param_grid, cv) -> GridSearchCV:
 
     """
     try:
-        if not isinstance(X_train, pd.DataFrame):
-            raise TypeError("Input data must be a pandas dataframe.")
-        if not isinstance(y_train, pd.Series):
-            raise TypeError("Input labels must be a pandas series.")
-
         if not param_grid:
             param_grid = {
-                'n_estimators': [250, 500, 750, 1000],  # Number of trees in the forest
+                # 'n_estimators': [250, 500, 750, 1000],  # Number of trees in the forest
                 'max_depth': [None, 10, 20, 30],  # Maximum depth of each tree
                 'min_samples_split': [2, 5, 10],  # Minimum number of samples required to split a node
                 'min_samples_leaf': [1, 2, 4],  # Minimum number of samples required at each leaf node
@@ -258,7 +216,7 @@ def improve_model(clf, X_train, y_train, param_grid, cv) -> GridSearchCV:
             f"Best parameters found: {clf.best_params_} with accuracy: {clf.best_score_}"
         )
         logging.info("Model improvement process completed successfully. Storing model...")
-        pickle.dump(clf, open("models/model_after_hp.pkl", "wb"))
+        pickle.dump(clf, open("../models/model_after_hp.pkl", "wb"))
         return clf
 
     except Exception as e:
