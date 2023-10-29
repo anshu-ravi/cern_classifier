@@ -87,3 +87,7 @@ target/
 
 # Mypy cache
 .mypy_cache/
+
+# Ignore all .pickle and .json files
+*.pkl
+*.json
