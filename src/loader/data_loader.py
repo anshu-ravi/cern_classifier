@@ -16,7 +16,7 @@ def data_loader(file_path: str) -> pd.DataFrame:
         file_path (str): The path to the file to load.
 
     Returns:
-        pandas.DataFrame: The loaded data, or None if an error occurred.
+        pandas.DataFrame: The loaded data
     """
     try:
         if not os.path.exists(file_path):
