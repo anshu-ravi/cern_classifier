@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
 from loggers.log_factory import setup_logging
+from typing import List, Optional
 
 logging = setup_logging(__name__)
 
@@ -45,7 +46,7 @@ def fill_missing_values(df, test=False):
 
 
 def clean_data(
-    df: pd.DataFrame, drop_columns: list = None, test: bool = False
+    df: pd.DataFrame, drop_columns: Optional[List[str]] = None, test: bool = False
 ) -> pd.DataFrame:
     """
     This function performs data cleaning on the input DataFrame. It drops the specified columns (if any), fills in missing values, and drops duplicates.
