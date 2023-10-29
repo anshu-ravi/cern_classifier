@@ -202,7 +202,7 @@ def improve_model(clf, X_train, y_train, param_grid, cv) -> GridSearchCV:
     try:
         if not param_grid:
             param_grid = {
-                # 'n_estimators': [250, 500, 750, 1000],  # Number of trees in the forest
+                'n_estimators': [250, 500, 750, 1000],  # Number of trees in the forest
                 'max_depth': [None, 10, 20, 30],  # Maximum depth of each tree
                 'min_samples_split': [2, 5, 10],  # Minimum number of samples required to split a node
                 'min_samples_leaf': [1, 2, 4],  # Minimum number of samples required at each leaf node
