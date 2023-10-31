@@ -1,11 +1,11 @@
-import logging
+# import logging
 import os
 from typing import Optional
 import yaml
 import pandas as pd
 from loggers.log_factory import setup_logging
 
-logging = setup_logging(__name__)
+
 
 
 def data_loader(file_path: str) -> pd.DataFrame:
@@ -18,10 +18,11 @@ def data_loader(file_path: str) -> pd.DataFrame:
     Returns:
         pandas.DataFrame: The loaded data
     """
+    logging = setup_logging(__name__)
     try:
         if not os.path.exists(file_path):
             logging.error(f"Error: File path {file_path} does not exist")
-            raise
+            raise FileNotFoundError(f'Error: File path {file_path} does not exist')
 
         logging.info(f"Loading data from {file_path}")
 
@@ -37,7 +38,8 @@ def data_loader(file_path: str) -> pd.DataFrame:
             data = pd.read_csv(file_path, sep="\t")
         else:
             logging.error(f"Error: Unsupported file type {file_extension}")
-            raise
+            raise ValueError(f"Error: Unsupported file type {file_extension}")
+            
         logging.info(f"Successfully loaded data from {file_path}")
         return data
 
