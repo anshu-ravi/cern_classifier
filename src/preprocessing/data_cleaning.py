@@ -5,8 +5,6 @@ from sklearn.impute import SimpleImputer
 from loggers.log_factory import setup_logging
 from typing import List, Optional
 
-logging = setup_logging(__name__)
-
 
 def fill_missing_values(df, test=False):
     """
@@ -21,6 +19,8 @@ def fill_missing_values(df, test=False):
     Returns:
         pandas.DataFrame: The input dataframe with missing values filled.
     """
+    logging = setup_logging(__name__)
+
     try:
         df["MR"] = np.log10(df["MR"])
         df["E1"] = np.log10(df["E1"])
@@ -63,6 +63,7 @@ def clean_data(
         ValueError: If the input DataFrame is empty.
 
     """
+    logging = setup_logging(__name__)
     try:
         logging.info("Starting data cleaning...")
         if df.empty:

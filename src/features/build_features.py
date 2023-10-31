@@ -5,9 +5,6 @@ from sklearn.preprocessing import OneHotEncoder
 import pandas as pd
 from loggers.log_factory import setup_logging
 
-logging = setup_logging(__name__)
-
-
 def create_buckets(
     data: pd.DataFrame, cols: List[str], test: bool = False):
     """
@@ -25,6 +22,8 @@ def create_buckets(
         pandas.DataFrame: The input DataFrame with the specified columns
         discretized into quartiles or the specified buckets.
     """
+    logging = setup_logging(__name__)
+
     try:
         if not test:
             logging.info("Creating buckets for train data.")
@@ -72,6 +71,8 @@ def convert_to_categorical(data: pd.DataFrame, cols: List[str], test: bool):
         pandas.DataFrame: The input DataFrame with the specified columns
         converted to one-hot encoded categorical variables.
     """
+    logging = setup_logging(__name__)
+
     try:
         if not test:
             logging.info("Converting columns to categorical for train data.")
@@ -108,6 +109,8 @@ def factorize(df: pd.DataFrame, test: bool) -> pd.DataFrame:
     Returns:
         pandas.DataFrame: The input DataFrame with the 'jets' column factorized.
     """
+    logging = setup_logging(__name__)
+
     try:
         if not test:
             factor = pd.factorize(df["jets"])
@@ -150,6 +153,8 @@ def run_fe(df: pd.DataFrame,
         pandas.DataFrame: The input DataFrame with all feature engineering
         functions applied.
     """
+    logging = setup_logging(__name__)
+
     try:
         logging.info("Running feature engineering.")
         df = create_buckets(df, bucket_cols)

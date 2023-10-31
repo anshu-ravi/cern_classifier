@@ -3,10 +3,8 @@ from pathlib import Path
 from typing import List
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
-from loader.data_loader import data_loader
+from src.loader.data_loader import data_loader
 from loggers.log_factory import setup_logging
-
-logger = setup_logging(__name__)
 
 def merge_data(df1: pd.DataFrame, df2: pd.DataFrame, column_name: str) -> pd.DataFrame:
     """
@@ -20,14 +18,15 @@ def merge_data(df1: pd.DataFrame, df2: pd.DataFrame, column_name: str) -> pd.Dat
     Returns:
         pandas.DataFrame: The merged dataframe.
     """
+    logging = setup_logging(__name__)
     try:
-        logger.info(f"Merging data on {column_name}")
+        logging.info(f"Merging data on {column_name}")
         data = pd.merge(df1, df2, on=column_name)
-        logger.info(f"Successfully merged data on {column_name}")
+        logging.info(f"Successfully merged data on {column_name}")
         return data
 
     except Exception as e:
-        logger.error(f"Error merging data: {e}")
+        logging.error(f"Error merging data: {e}")
         raise
 
 
@@ -42,16 +41,17 @@ def load_data(input_filepath: List[str], output_filepath: str) -> pd.DataFrame:
     Returns:
         None
     """
+    logging = setup_logging(__name__)
     try:
         df1 = data_loader(input_filepath[0])
         df2 = data_loader(input_filepath[1])
 
-        logger.info("Converting raw data into interim data")
+        logging.info("Converting raw data into interim data")
         data = merge_data(df1, df2, "id")
         data.to_csv(output_filepath, index=False)
-        logger.info(f"Successfully saved merged data to {output_filepath}")
+        logging.info(f"Successfully saved merged data to {output_filepath}")
         return data
 
     except Exception as e:
-        logger.error(f"Error loading or merging data: {e}")
+        logging.error(f"Error loading or merging data: {e}")
         raise

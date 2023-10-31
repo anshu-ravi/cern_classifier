@@ -7,8 +7,6 @@ import yaml
 import json
 from loggers.log_factory import setup_logging
 
-logging = setup_logging(__name__)
-
 
 def model_predict(model, data):
     """
@@ -21,6 +19,7 @@ def model_predict(model, data):
     Returns:
         numpy array: The predicted class labels for the given data.
     """
+    logging = setup_logging(__name__)
     try:
         if isinstance(model, str):
             model = pickle.load(open(model, 'rb'))

@@ -4,13 +4,12 @@ import lime.lime_tabular
 import pandas as pd
 from loggers.log_factory import setup_logging
 
-logging = setup_logging(__name__)
-
 
 def run_lime_analysis(model, X_test: pd.DataFrame, y_test: pd.Series, instance_index: int):
     """
     Runs LIME analysis on the model for a specific instance in the test set and saves the plot to disk.
     """
+    logging = setup_logging(__name__)
     try:
         logging.info("Running LIME analysis.")
 

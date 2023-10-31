@@ -9,7 +9,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 from loggers.log_factory import setup_logging   
 
-logging = setup_logging(__name__)
 
 def data_split(df: pd.DataFrame, y_col: str, test_size: float) -> tuple:
     """
@@ -28,6 +27,8 @@ def data_split(df: pd.DataFrame, y_col: str, test_size: float) -> tuple:
         ValueError: If the test_size is not between 0 and 1.
 
     """
+    logging = setup_logging(__name__)
+
     if y_col not in df.columns:
         raise ValueError(
             f"Target column '{y_col}' not found in dataframe columns: {df.columns}"
@@ -71,6 +72,8 @@ def scale_data(df: pd.DataFrame, test: bool = False) -> pd.DataFrame:
         ValueError: If the scaler file is empty.
 
     """
+    logging = setup_logging(__name__)
+
     try:
         if not test:
             scaler = StandardScaler()
@@ -112,6 +115,7 @@ def train_random_forest_model(
         TypeError: If the input data is not a pandas dataframe or series.
 
     """
+    logging = setup_logging(__name__)
     try:
         clf = RandomForestClassifier(
             n_estimators=500, criterion="entropy", random_state=random_state
@@ -142,6 +146,8 @@ def evaluate_model(clf, X_valid, y_valid):
         TypeError: If the input data is not a pandas dataframe or series.
 
     """
+    logging = setup_logging(__name__)
+
     try:
         preds = clf.predict(X_valid)
         clf_report = classification_report(y_valid, preds)
@@ -199,6 +205,8 @@ def improve_model(clf, X_train, y_train, param_grid, cv) -> GridSearchCV:
         TypeError: If the input data is not a pandas dataframe or series.
 
     """
+    logging = setup_logging(__name__)
+
     try:
         if not param_grid:
             param_grid = {
@@ -237,6 +245,8 @@ def build_model(df: pd.DataFrame, y_col: str, test_size: float = 0.2, param_grid
     Returns:
     clf: The trained classifier.
     """
+    logging = setup_logging(__name__)
+
     try:
         logging.info("Starting model building process...")
         X_train, X_valid, y_train, y_valid = data_split(df, y_col, test_size)
