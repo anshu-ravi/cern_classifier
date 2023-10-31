@@ -3,16 +3,13 @@ This module provides logging configuration for the project.
 """
 
 import logging
-# import sys
 import os
 from typing import Optional
-# from pathlib import Path
 import yaml
 
 
 ABS_PATH = "/mnt/c/Users/ransh/Documents/IE University/Year 5/Sem1/MLOps/cern_classifer/"
 
-# sys.path.append(str(Path(ABS_PATH).resolve()))
 
 def setup_logging(name) -> Optional[logging.Logger]:
     """
@@ -29,7 +26,7 @@ def setup_logging(name) -> Optional[logging.Logger]:
         KeyError: If the configuration file is missing required keys.
     """
     try:
-        with open('../config.yaml', 'r', encoding='utf-8') as config_file:
+        with open(ABS_PATH+'config.yaml', 'r', encoding='utf-8') as config_file:
             config = yaml.safe_load(config_file)
     except FileNotFoundError:
         print("Configuration file not found.")
