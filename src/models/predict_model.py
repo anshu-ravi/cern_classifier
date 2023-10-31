@@ -1,31 +1,14 @@
+from math import log
 import pickle
 import sys
 import logging
 from pathlib import Path
 import yaml
 import json
+from loggers.log_factory import setup_logging
 
-sys.path.append(
-    str(
-        Path(
-            "/mnt/c/Users/ransh/Documents/IE University/Year 5/Sem1/MLOps/cern_classifer/"
-        ).resolve()
-    )
-)
+logging = setup_logging(__name__)
 
-try:
-    with open("config.yaml", "r", encoding="utf-8") as config_file:
-        config_data = yaml.load(config_file, Loader=yaml.FullLoader)
-        logging_rules = config_data.get("logging", {})
-        logging.basicConfig(
-            level=logging.getLevelName(config_data["logging"]["level"]),
-            format=config_data["logging"]["format"],
-        )
-
-except FileNotFoundError:
-    print(f"Error: File path not found.")
-except yaml.YAMLError as e:
-    print(f"Error parsing YAML: {e}")
 
 def model_predict(model, data):
     """
