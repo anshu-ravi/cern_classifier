@@ -64,6 +64,7 @@ def clean_data(
 
     """
     logging = setup_logging(__name__)
+
     try:
         logging.info("Starting data cleaning...")
         if df.empty:
